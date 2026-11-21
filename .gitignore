@@ -1,0 +1,10 @@
+/vendor/
+/var/cache/
+/var/log/
+/var/lab/
+/var/evidence/
+/.env.local
+
+# Local diagnostics and temporary backups
+*.bak
+*.before-fix*

@@ -1,0 +1,64 @@
+<?php
+
+declare(strict_types=1);
+namespace Stillwired\Lab;
+
+use Symfony\AI\McpBundle\Client\McpClientInterface;
+use Symfony\Component\DependencyInjection\Attribute\Target;
+
+/** Authoritative verdict is computed in PHP; never derived from model prose. */
+final class McpVerifier
+{
+    public function __construct(
+        #[Target('stillwired')] private McpClientInterface $client,
+        private StateStore $state,
+    ) {}
+
+    public function verify(): array
+    {
+        $canaryId = 'SW-'.strtoupper(bin2hex(random_bytes(8)));
+        $states = [];
+        $errors = [];
+        $attempts = [];
+        foreach (['webhook' => ['webhook','observe_webhook','emit_webhook_canary'], 'scheduled_export' => ['scheduler','observe_export','emit_export_canary']] as $flow => [$server,$observe,$probe]) {
+            try {
+                $connection = $this->client->get($server);
+                $result = $connection->callTool($observe, []);
+                $data = json_decode($result->content[0]->text ?? '', true, 512, JSON_THROW_ON_ERROR);
+                $states[$flow] = $data['state'] ?? 'unknown';
+                if (!in_array($states[$flow], ['active','disabled'], true)) throw new \RuntimeException('Invalid source status');
+            } catch (\Throwable $e) {
+                $states[$flow] = 'unknown';
+                $errors[$flow] = 'OBSERVE: '.get_debug_type($e).': '.$e->getMessage();
+                continue;
+            }
+            try {
+                $probeResult = $connection->callTool($probe, ['canaryId' => $canaryId]);
+                $attempt = json_decode($probeResult->content[0]->text ?? '', true, 512, JSON_THROW_ON_ERROR);
+                if (($attempt['canary_id'] ?? null) !== $canaryId || !isset($attempt['delivered']) || !is_bool($attempt['delivered'])) throw new \RuntimeException('Invalid canary response');
+                $attempts[$flow] = $attempt;
+            } catch (\Throwable $e) {
+                // A known-active source remains exposed despite a failed probe.
+                // A disabled source with failed probe cannot be VERIFIED.
+                if ($states[$flow] !== 'active') $states[$flow] = 'unknown';
+                $errors[$flow] = 'PROBE: '.get_debug_type($e).': '.$e->getMessage();
+            }
+        }
+        $deliveries = $this->state->delivered($canaryId);
+        $positiveProbe = false;
+        foreach ($attempts as $attempt) {
+            if ($attempt['delivered'] === true) { $positiveProbe = true; break; }
+        }
+        $decision = in_array('active', $states, true) || count($deliveries) > 0 || $positiveProbe
+            ? 'EXPOSED'
+            : (in_array('unknown', $states, true) ? 'INCONCLUSIVE' : 'VERIFIED');
+        return [
+            'decision' => $decision, 'account_active' => $this->state->humanActive(),
+            'observed_states' => $states, 'canary_id' => $canaryId,
+            'probe_attempts' => $attempts, 'deliveries' => $deliveries,
+            'source_errors' => $errors,
+            'scope' => ['webhook','scheduled_export'],
+            'limitations' => ['Synthetic, synchronous test; only enumerated sources', 'No delayed queue guarantee', 'No unknown credential discovery'],
+        ];
+    }
+}

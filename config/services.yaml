@@ -1,0 +1,12 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+    Stillwired\:
+        resource: '../src/'
+        exclude:
+            - '../src/Kernel.php'
+            - '../src/Domain/'
+    Stillwired\Lab\StateStore:
+        arguments:
+            $projectDir: '%kernel.project_dir%'

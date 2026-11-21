@@ -1,0 +1,32 @@
+# STILLWIRED Gate 1: two distinct MCP servers, Symfony client over localhost HTTP.
+# Local synthetic lab only; NOT authenticated for public Internet exposure.
+mcp:
+    servers:
+        webhook:
+            name: stillwired-webhook-source
+            transports: { stdio: true, http: true }
+            http:
+                path: /mcp/webhook
+                allowed_hosts: ['127.0.0.1', 'localhost']
+            registry:
+                tools: ['Stillwired\Mcp\WebhookTools']
+        scheduler:
+            name: stillwired-scheduler-source
+            transports: { stdio: true, http: true }
+            http:
+                path: /mcp/scheduler
+                allowed_hosts: ['127.0.0.1', 'localhost']
+            registry:
+                tools: ['Stillwired\Mcp\SchedulerTools']
+    clients:
+        stillwired:
+            init_timeout: 8
+            request_timeout: 10
+            max_retries: 1
+            servers:
+                webhook:
+                    transport: http
+                    url: 'http://127.0.0.1:8787/mcp/webhook'
+                scheduler:
+                    transport: http
+                    url: 'http://127.0.0.1:8787/mcp/scheduler'

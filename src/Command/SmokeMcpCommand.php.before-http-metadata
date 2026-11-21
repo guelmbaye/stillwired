@@ -1,0 +1,41 @@
+<?php
+
+declare(strict_types=1);
+namespace Stillwired\Command;
+
+use Stillwired\Domain\Evidence;
+use Symfony\AI\McpBundle\Client\McpClientInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\Attribute\Target;
+
+#[AsCommand(name: 'sw:smoke-mcp', description: 'Actual STDIO MCP tools/list + tools/call smoke check, both servers')]
+final class SmokeMcpCommand extends Command
+{
+    public function __construct(#[Target('stillwired')] private McpClientInterface $client) { parent::__construct(); }
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        $trace = ['test' => 'two independent STDIO MCP connections', 'transport' => 'stdio', 'timestamp_utc' => gmdate('c'), 'servers' => []];
+        try {
+            foreach (['webhook' => 'observe_webhook', 'scheduler' => 'observe_export'] as $server => $tool) {
+                $connection = $this->client->get($server);
+                $names = array_map(static fn ($item) => $item->name, $connection->getTools());
+                if (!in_array($tool, $names, true)) throw new \RuntimeException('Tool not listed: '.$server.'/'.$tool);
+                $result = $connection->callTool($tool, []);
+                $status = json_decode($result->content[0]->text ?? '', true, 512, JSON_THROW_ON_ERROR);
+                $trace['servers'][$server] = ['tools_list' => $names, 'tools_call' => $tool, 'response' => $status, 'protocol_version' => $connection->getProtocolVersion()];
+                $output->writeln('PASS MCP tools/list + tools/call '.$server);
+            }
+        } catch (\Throwable $e) {
+            $trace['error'] = get_debug_type($e).': '.$e->getMessage();
+            $output->writeln('<error>MCP_SMOKE_FAIL: '.$trace['error'].'</error>');
+            return Command::FAILURE;
+        }
+        $path = dirname(__DIR__, 2).'/var/evidence/gate1-mcp-connection.json';
+        Evidence::write($path, $trace);
+        $output->writeln('MCP_SMOKE_PASS; evidence: '.$path);
+        return Command::SUCCESS;
+    }
+}

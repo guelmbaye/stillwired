@@ -1,0 +1,115 @@
+{
+  "title": "STILLWIRED — False Green",
+  "type": "SYNTHETIC_LAB_EVIDENCE",
+  "caution": "C1 and C2 are separate controlled runs. No real vendor or customer data. SHA-256 sidecars are local integrity checks, NOT source authentication.",
+  "c1": {
+    "status_only": "VERIFIED",
+    "verdict": "EXPOSED",
+    "reported_states": {
+      "webhook": "disabled",
+      "scheduled_export": "disabled"
+    },
+    "receipts": [
+      {
+        "flow": "webhook",
+        "event_id": "1b29daba9cbb2c0b",
+        "canary_id": "SW-67E7CE3B5844988B",
+        "timestamp_utc": "2026-11-21T10:31:01+00:00"
+      },
+      {
+        "flow": "scheduled_export",
+        "event_id": "cc9b58875c0569e6",
+        "canary_id": "SW-67E7CE3B5844988B",
+        "timestamp_utc": "2026-11-21T10:31:01+00:00"
+      }
+    ],
+    "after_stop": {
+      "decision": "VERIFIED",
+      "new_deliveries": 0
+    }
+  },
+  "c2": {
+    "status_only": "VERIFIED",
+    "verdict": "EXPOSED",
+    "canary_id": "SW-AI-EB4725083F3A8896",
+    "receipt_count": 2,
+    "receipts": [
+      {
+        "flow": "webhook",
+        "event_id": "42d5e4f94381d94c",
+        "canary_id": "SW-AI-EB4725083F3A8896",
+        "timestamp_utc": "2026-11-21T10:39:49+00:00"
+      },
+      {
+        "flow": "scheduled_export",
+        "event_id": "a83548af8f7eba95",
+        "canary_id": "SW-AI-EB4725083F3A8896",
+        "timestamp_utc": "2026-11-21T10:39:49+00:00"
+      }
+    ],
+    "tool_names": [
+      "webhook_observe_webhook",
+      "scheduler_observe_export",
+      "webhook_emit_webhook_canary",
+      "scheduler_emit_export_canary"
+    ],
+    "trace": [
+      {
+        "tool": "webhook_observe_webhook",
+        "status": "requested",
+        "timestamp_utc": "2026-11-21T10:39:47+00:00"
+      },
+      {
+        "tool": "webhook_observe_webhook",
+        "status": "succeeded",
+        "timestamp_utc": "2026-11-21T10:39:47+00:00"
+      },
+      {
+        "tool": "scheduler_observe_export",
+        "status": "requested",
+        "timestamp_utc": "2026-11-21T10:39:47+00:00"
+      },
+      {
+        "tool": "scheduler_observe_export",
+        "status": "succeeded",
+        "timestamp_utc": "2026-11-21T10:39:47+00:00"
+      },
+      {
+        "tool": "webhook_emit_webhook_canary",
+        "status": "requested",
+        "timestamp_utc": "2026-11-21T10:39:49+00:00"
+      },
+      {
+        "tool": "webhook_emit_webhook_canary",
+        "status": "succeeded",
+        "timestamp_utc": "2026-11-21T10:39:49+00:00"
+      },
+      {
+        "tool": "scheduler_emit_export_canary",
+        "status": "requested",
+        "timestamp_utc": "2026-11-21T10:39:49+00:00"
+      },
+      {
+        "tool": "scheduler_emit_export_canary",
+        "status": "succeeded",
+        "timestamp_utc": "2026-11-21T10:39:49+00:00"
+      }
+    ],
+    "model_receipts_cited": true,
+    "agent_mutations_observed": false
+  },
+  "evidence_sha256": {
+    "competitive-false-green.json": "9274f7b2f5b2bb201ccaa7275c2d4f3c8addfbadef1f67e7c8bf7fb49c51b784",
+    "competitive-truly-closed.json": "5141ac6b99ecdee9a12cdaede98fb7c3938c3dfef568f320c14f2e0018046448",
+    "c2-summary.json": "949d6b2a704f52752f8f5f04ee396ed5dbbb6122b7257f465f08f501903cd5dc",
+    "c2-php-verdict.json": "99d76be5be3a129c0c962f67d78f04e0ceb21e04c52d610da6bd62ebd085861f",
+    "c2-agent-tool-events.jsonl": "a1056eb527bf8ab14c2e618be38d5f2516c236a027617cf2fb1fba2c19bd3042",
+    "c2-ai-transcript.txt": "09fdfff2416e38b6f15444b328aaa87e5af9c16eb123952dc6d4190369ffe1ba"
+  },
+  "limitations": [
+    "Enumerated synthetic integrations only",
+    "No guarantee regarding delayed queues, retries, or unknown credentials",
+    "Approval tokens are a lab mechanism, not production IAM",
+    "Baseline is status-only, not a best-in-class security tool"
+  ]
+}

@@ -1,0 +1,46 @@
+<?php
+
+declare(strict_types=1);
+namespace Stillwired\Command;
+
+use Symfony\AI\Agent\AgentInterface;
+use Symfony\AI\Platform\Message\Message;
+use Symfony\AI\Platform\Message\MessageBag;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+
+#[AsCommand(name: 'sw:investigate', description: 'Live Symfony AI investigation across both MCP servers; read-only by policy')]
+final class InvestigateCommand extends Command
+{
+    public function __construct(private AgentInterface $agent) { parent::__construct(); }
+    protected function configure(): void
+    {
+        $this->addArgument('incident', InputArgument::OPTIONAL, 'Natural language incident', 'The contractor user was revoked. Are any independent outbound data flows still working? Investigate both providers using their tools.');
+    }
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        $system = 'You are a read-only synthetic incident investigator. Discover and call both independent MCP servers. Inspect each provider and report evidence, scope, and uncertainty. Never call stop tools, never invent evidence, and never claim verified closure. A separate PHP verifier issues final verdicts.';
+        try {
+            $result = $this->agent->call(
+				new MessageBag(
+					Message::forSystem($system),
+					Message::ofUser((string) $input->getArgument('incident'))
+				),
+				[
+					'tools' => [
+						'webhook_observe_webhook',
+						'scheduler_observe_export',
+					],
+				]
+			);
+            $output->writeln((string) $result->getContent());
+            return Command::SUCCESS;
+        } catch (\Throwable $e) {
+            $output->writeln('<error>AGENT_ERROR: '.$e->getMessage().'</error>');
+            return Command::FAILURE;
+        }
+    }
+}

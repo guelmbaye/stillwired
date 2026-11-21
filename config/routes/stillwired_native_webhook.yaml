@@ -1,0 +1,3 @@
+stillwired_native_webhook:
+    resource: '@FrameworkBundle/Resources/config/routing/webhook.php'
+    prefix: /webhook

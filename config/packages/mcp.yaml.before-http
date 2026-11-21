@@ -1,0 +1,23 @@
+mcp:
+    servers:
+        webhook:
+            name: stillwired-webhook-source
+            transports: { stdio: true, http: false }
+            registry:
+                tools: ['Stillwired\Mcp\WebhookTools']
+        scheduler:
+            name: stillwired-scheduler-source
+            transports: { stdio: true, http: false }
+            registry:
+                tools: ['Stillwired\Mcp\SchedulerTools']
+    clients:
+        stillwired:
+            servers:
+                webhook:
+                    transport: stdio
+                    command: ['php', '%kernel.project_dir%/bin/console', 'mcp:server', 'webhook']
+                    cwd: '%kernel.project_dir%'
+                scheduler:
+                    transport: stdio
+                    command: ['php', '%kernel.project_dir%/bin/console', 'mcp:server', 'scheduler']
+                    cwd: '%kernel.project_dir%'

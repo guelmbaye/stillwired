@@ -1,0 +1,3 @@
+framework:
+    secret: 'stillwired-synthetic-local-development-only'
+    http_method_override: false

@@ -1,0 +1,6 @@
+framework:
+    webhook:
+        routing:
+            stillwired_github:
+                service: Stillwired\NativeWebhook\GitHubWebhookRequestParser
+                secret: '%env(SW_C6_GITHUB_WEBHOOK_SECRET)%'

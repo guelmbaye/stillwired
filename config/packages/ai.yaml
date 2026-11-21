@@ -1,0 +1,11 @@
+ai:
+    platform:
+        openai:
+            api_key: '%env(OPENAI_API_KEY)%'
+    agent:
+        default:
+            model: 'gpt-4o-mini'
+            max_tool_calls: 8
+            tools:
+                - { mcp_server: 'stillwired.webhook' }
+                - { mcp_server: 'stillwired.scheduler' }
