@@ -13,3 +13,5 @@
 /.env.*.local
 /var/
 *.before-*
+
+/config/reference.php
