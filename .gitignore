@@ -8,3 +8,8 @@
 # Local diagnostics and temporary backups
 *.bak
 *.before-fix*
+
+/.env
+/.env.*.local
+/var/
+*.before-*
